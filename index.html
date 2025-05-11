@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Grade Ranker</title>
+  <script type="module" src="script.js"></script>
+</head>
+<body>
+  <h1>Grade Ranker</h1>
+
+  <div id="auth">
+    <h2>Login</h2>
+    <input id="email" type="email" placeholder="Email"><br>
+    <input id="password" type="password" placeholder="Password"><br>
+    <button onclick="login()">Login</button>
+    <button onclick="signup()">Sign Up</button>
+  </div>
+
+  <div id="main" style="display:none;">
+    <h2>Enter Grades</h2>
+    <div id="grade-form"></div>
+    <button onclick="submitGrades()">Submit Grades</button>
+
+    <h2>Ranking</h2>
+    <button onclick="loadRankings()">Refresh Rankings</button>
+    <table id="ranking-table" border="1"></table>
+
+    <button onclick="logout()">Logout</button>
+  </div>
+</body>
+</html>
