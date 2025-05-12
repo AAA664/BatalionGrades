@@ -95,8 +95,9 @@
 
   <div id="auth">
     <h2>تسجيل الدخول</h2>
-    <input id="email" type="email" placeholder="البريد الإلكتروني"><br>
-    <input id="password" type="password" placeholder="كلمة المرور"><br>
+    <div id="login-error" style="color: red; margin-bottom: 10px;"></div>
+    <input id="email" type="email" placeholder="البريد الإلكتروني" required><br>
+    <input id="password" type="password" placeholder="كلمة المرور" required><br>
     <button onclick="login()">تسجيل الدخول</button>
   </div>
 
