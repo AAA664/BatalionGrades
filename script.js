@@ -1,8 +1,8 @@
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
 
 const supabase = createClient(
-  'https://hnithcvhemzsicwabhtq.supabase.co', // replace with your URL
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhuaXRoY3ZoZW16c2ljd2FiaHRxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDY5OTE2NDksImV4cCI6MjA2MjU2NzY0OX0.FVkMWLqm6hzzd-7znR3iTo0XU1fjj4EJpQrD3ElzFoQ'                     // replace with your anon key
+  'https://your-project.supabase.co', // replace with your URL
+  'your-anon-key'                     // replace with your anon key
 )
 
 window.login = async () => {
@@ -53,14 +53,23 @@ window.submitGrades = async () => {
 
   const entries = []
   for (const course of courses) {
-    const val = parseFloat(document.getElementById(`course-${course.id}`).value)
-    if (!isNaN(val)) {
-      entries.push({
-        user_id: user.id,
-        course_id: course.id,
-        grade: val
-      })
+    const inputElem = document.getElementById(`course-${course.id}`)
+    const val = parseFloat(inputElem.value)
+    if (inputElem.value.trim() === "") {
+      alert(`Please enter a grade for ${course.name}.`)
+      inputElem.focus()
+      return
     }
+    if (isNaN(val) || val < 0 || val > 100) {
+      alert(`Please enter a valid grade (0-100) for ${course.name}.`)
+      inputElem.focus()
+      return
+    }
+    entries.push({
+      user_id: user.id,
+      course_id: course.id,
+      grade: val
+    })
   }
 
   for (const e of entries) {
