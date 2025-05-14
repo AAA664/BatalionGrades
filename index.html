@@ -4,89 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>تصنيف الدرجات</title>
-  <style>
-    /* Reset some default styles */
-    body, h1, h2, input, button, table {
-      margin: 0;
-      padding: 0;
-      font-family: Arial, sans-serif;
-    }
-    body {
-      padding: 10px;
-      background: #f4f4f9;
-      color: #333;
-      direction: rtl;
-      text-align: right;
-    }
-    h1 {
-      text-align: center;
-      margin-bottom: 20px;
-      color: #2c3e50;
-    }
-    #auth, #main {
-      max-width: 400px;
-      margin: 0 auto 20px auto;
-      background: white;
-      padding: 20px;
-      border-radius: 8px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-    }
-    input[type="email"], input[type="password"], input[type="number"] {
-      width: 100%;
-      padding: 10px;
-      margin: 8px 0 15px 0;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-      box-sizing: border-box;
-      font-size: 16px;
-    }
-    button {
-      background-color: #3498db;
-      color: white;
-      border: none;
-      padding: 12px 20px;
-      margin: 5px 0 5px 5px;
-      border-radius: 4px;
-      cursor: pointer;
-      font-size: 16px;
-      transition: background-color 0.3s ease;
-    }
-    button:hover {
-      background-color: #2980b9;
-    }
-    #grade-form input[type="number"] {
-      margin-bottom: 10px;
-    }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 10px;
-    }
-    th, td {
-      padding: 10px;
-      text-align: center;
-      border-bottom: 1px solid #ddd;
-    }
-    @media (max-width: 480px) {
-      #auth, #main {
-        padding: 15px;
-        margin: 10px;
-      }
-      button {
-        width: 100%;
-        margin: 8px 0;
-      }
-      #grade-form input[type="number"] {
-        font-size: 14px;
-      }
-      h1 {
-        font-size: 24px;
-      }
-      h2 {
-        font-size: 18px;
-      }
-    }
-  </style>
+  <link rel="stylesheet" href="styles.css">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="script.js"></script>
 </head>
@@ -95,22 +13,21 @@
 
   <div id="auth">
     <h2>تسجيل الدخول</h2>
-    <div id="login-error" style="color: red; margin-bottom: 10px;"></div>
-    <input id="email" type="email" placeholder="البريد الإلكتروني" required><br>
-    <input id="password" type="password" placeholder="كلمة المرور" required><br>
+    <div id="login-error"></div>
+    <div class="input-group">
+      <input id="email" type="email" placeholder="البريد الإلكتروني" required>
+      <input id="password" type="password" placeholder="كلمة المرور" required>
+    </div>
     <button onclick="login()">تسجيل الدخول</button>
   </div>
 
   <div id="main" style="display:none;">
-    <h2>إدخال الدرجات</h2>
+    <h2>الدرجات</h2>
     <div id="grade-form"></div>
-    <button onclick="submitGrades()">حفظ الدرجات</button>
-
-    <h2>التصنيف</h2>
-    <button onclick="loadRankings()">تحديث التصنيف</button>
-    <table id="ranking-table" border="1"></table>
-
-    <button onclick="logout()">تسجيل الخروج</button>
+    <div class="button-group">
+      <button onclick="location.href='ranking.html'" class="primary">عرض التصنيف</button>
+      <button onclick="logout()" class="secondary">تسجيل الخروج</button>
+    </div>
   </div>
 </body>
 </html>

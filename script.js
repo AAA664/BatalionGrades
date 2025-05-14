@@ -3,6 +3,23 @@ const supabaseUrl = 'https://hnithcvhemzsicwabhtq.supabase.co';
 const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhuaXRoY3ZoZW16c2ljd2FiaHRxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDY5OTE2NDksImV4cCI6MjA2MjU2NzY0OX0.FVkMWLqm6hzzd-7znR3iTo0XU1fjj4EJpQrD3ElzFoQ';
 const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
 
+// Add this function at the top after Supabase initialization
+function showNotification(message, type = 'success') {
+  const notification = document.createElement('div');
+  notification.className = `notification ${type}`;
+  notification.textContent = message;
+  document.body.appendChild(notification);
+  
+  setTimeout(() => {
+    notification.classList.add('show');
+  }, 100);
+
+  setTimeout(() => {
+    notification.classList.remove('show');
+    setTimeout(() => notification.remove(), 300);
+  }, 3000);
+}
+
 // Login function
 window.login = async () => {
   try {
@@ -10,7 +27,7 @@ window.login = async () => {
     const password = document.getElementById("password").value;
     
     if (!email || !password) {
-      alert("الرجاء إدخال البريد الإلكتروني وكلمة المرور");
+      showNotification("الرجاء إدخال البريد الإلكتروني وكلمة المرور", 'error');
       return;
     }
 
@@ -20,16 +37,17 @@ window.login = async () => {
     });
 
     if (error) {
-      alert(error.message);
+      showNotification(error.message, 'error');
       return;
     }
 
     if (data.user) {
+      showNotification("تم تسجيل الدخول بنجاح");
       await init();
     }
   } catch (err) {
     console.error('Login error:', err);
-    alert("حدث خطأ في تسجيل الدخول");
+    showNotification("خطأ في تسجيل الدخول", 'error');
   }
 };
 
@@ -47,109 +65,143 @@ async function init() {
 
   // Fetch courses and grades for the user
   const { data: courses } = await supabase.from("courses").select("*");
-  const { data: grades } = await supabase.from("grades").select("*").eq("user_id", user.id);
+  const { data: grades } = await supabase.from("grades")
+    .select("*, courses(*)")
+    .eq("user_id", user.id);
 
-  // Map grades by course_id for quick lookup
-  const gradeMap = {};
-  grades.forEach(g => {
-    gradeMap[g.course_id] = g.grade;
-  });
+  // Sort grades by course code instead of name
+  grades.sort((a, b) => a.courses.code.localeCompare(b.courses.code));
 
   const formDiv = document.getElementById("grade-form");
   formDiv.innerHTML = "";
 
-  courses.forEach(c => {
-    const container = document.createElement("div");
-    container.style.marginBottom = "10px";
+  // Display existing grades in a table
+  const gradesTable = document.createElement("table");
+  gradesTable.innerHTML = `
+    <tr>
+      <th>رمز المادة</th>
+      <th>العلامة</th>
+      <th>تعديل</th>
+    </tr>
+  `;
 
-    const label = document.createElement("label");
-    label.textContent = c.name + ": ";
-    label.style.fontWeight = "bold";
-    container.appendChild(label);
-
-    if (gradeMap.hasOwnProperty(c.id)) {
-      // Show grade in a non-editable label
-      const gradeLabel = document.createElement("span");
-      gradeLabel.textContent = gradeMap[c.id].toFixed(2);
-      gradeLabel.style.marginRight = "10px";
-      container.appendChild(gradeLabel);
-    } else {
-      // Show input for entering grade
-      const input = document.createElement("input");
-      input.type = "number";
-      input.id = `course-${c.id}`;
-      input.placeholder = "لا يوجد درجة";
-      input.step = "0.01";
-      input.min = "0";
-      input.max = "100";
-      input.style.width = "60px";
-      container.appendChild(input);
-    }
-
-    formDiv.appendChild(container);
+  grades.forEach(g => {
+    const row = document.createElement("tr");
+    row.innerHTML = `
+      <td>${g.courses.code}</td>
+      <td>${g.grade}</td>
+      <td>
+        <button onclick="editGrade(${g.course_id}, ${g.grade})">تعديل</button>
+      </td>
+    `;
+    gradesTable.appendChild(row);
   });
+
+  formDiv.appendChild(gradesTable);
+
+  // Create "Add Grade" button and course selection
+  const addGradeDiv = document.createElement("div");
+  addGradeDiv.style.marginTop = "20px";
+
+  // Filter out courses that already have grades
+  const existingCourseIds = new Set(grades.map(g => g.course_id));
+  const availableCourses = courses.filter(c => !existingCourseIds.has(c.id));
+
+  if (availableCourses.length > 0) {
+    const select = document.createElement("select");
+    select.id = "course-select";
+    select.innerHTML = "<option value=''>اختر المادة</option>";
+    availableCourses.forEach(c => {
+      select.innerHTML += `<option value="${c.id}">${c.code}</option>`;
+    });
+
+    const gradeInput = document.createElement("input");
+    gradeInput.type = "number";
+    gradeInput.id = "new-grade";
+    gradeInput.placeholder = "العلامة";
+    gradeInput.min = "0";
+    gradeInput.max = "100";
+    gradeInput.step = "0.01";
+    gradeInput.style.width = "80px";
+    gradeInput.style.marginRight = "10px";
+    gradeInput.style.marginLeft = "10px";
+
+    const addButton = document.createElement("button");
+    addButton.textContent = "إضافة العلامة";
+    addButton.onclick = () => addNewGrade();
+
+    addGradeDiv.appendChild(select);
+    addGradeDiv.appendChild(gradeInput);
+    addGradeDiv.appendChild(addButton);
+  }
+
+  formDiv.appendChild(addGradeDiv);
 }
 
-window.submitGrades = async () => {
+// Update the editGrade function
+window.editGrade = async (courseId, currentGrade) => {
+  const newGrade = prompt(`أدخل العلامة الجديدة (${currentGrade}):`, currentGrade);
+  if (newGrade === null) return;
+
+  const grade = parseFloat(newGrade);
+  if (isNaN(grade) || grade < 0 || grade > 20) {
+    showNotification("الرجاء إدخال علامة صحيحة بين 0 و 20", 'error');
+    return;
+  }
+
   const { data: { user } } = await supabase.auth.getUser();
-  const { data: courses } = await supabase.from("courses").select("*");
-
-  const entries = [];
-  for (const course of courses) {
-    const inputElem = document.getElementById(`course-${course.id}`);
-    if (!inputElem) continue; // skip courses with existing grades
-
-    const valStr = inputElem.value.trim();
-    if (valStr === "") {
-      alert(`الرجاء إدخال درجة للمادة ${course.name}.`);
-      inputElem.focus();
-      return;
-    }
-    const val = parseFloat(valStr);
-    if (isNaN(val) || val < 0 || val > 100) {
-      alert(`الرجاء إدخال درجة صحيحة بين 0 و 100 للمادة ${course.name}.`);
-      inputElem.focus();
-      return;
-    }
-    entries.push({
-      user_id: user.id,
-      course_id: course.id,
-      grade: val
-    });
+  if (!user) {
+    showNotification("يرجى تسجيل الدخول أولاً", 'error');
+    return;
   }
 
-  for (const e of entries) {
-    await supabase.from("grades")
-      .upsert(e, { onConflict: ["user_id", "course_id"] });
+  // First try to update existing grade
+  const { error: updateError } = await supabase
+    .from("grades")
+    .update({ grade: grade })
+    .match({ user_id: user.id, course_id: courseId });
+
+  if (updateError) {
+    console.error('Update error:', updateError);
+    showNotification("خطأ في تحديث العلامة", 'error');
+    return;
   }
 
-  alert("تم حفظ الدرجات.");
-  init(); // refresh form to show updated grades
+  showNotification("تم تحديث العلامة بنجاح");
+  await init();
 };
 
-window.loadRankings = async () => {
-  const { data: grades } = await supabase.from("grades").select("*");
-  const { data: courses } = await supabase.from("courses").select("id, credit");
-  const courseMap = Object.fromEntries(courses.map(c => [c.id, c.credit]));
+// Update the addNewGrade function
+window.addNewGrade = async () => {
+  const courseId = document.getElementById("course-select").value;
+  const grade = parseFloat(document.getElementById("new-grade").value);
 
-  const userScores = {};
-  for (const g of grades) {
-    const credit = courseMap[g.course_id] || 1;
-    if (!userScores[g.user_id]) userScores[g.user_id] = { total: 0, credits: 0 };
-    userScores[g.user_id].total += g.grade * credit;
-    userScores[g.user_id].credits += credit;
+  if (!courseId) {
+    showNotification("الرجاء اختيار المادة", 'error');
+    return;
   }
 
-  const result = Object.entries(userScores).map(([uid, v]) => ({
-    uid,
-    average: v.total / v.credits
-  })).sort((a, b) => b.average - a.average);
+  if (isNaN(grade) || grade < 0 || grade > 20) {
+    showNotification("الرجاء إدخال علامة صحيحة بين 0 و 20", 'error');
+    return;
+  }
 
-  const table = document.getElementById("ranking-table");
-  table.innerHTML = "<tr><th>الترتيب</th><th>معرف المستخدم</th><th>المعدل</th></tr>";
-  result.forEach((r, i) => {
-    table.innerHTML += `<tr><td>${i + 1}</td><td>${r.uid.slice(0, 6)}...</td><td>${r.average.toFixed(2)}</td></tr>`;
-  });
-}
+  const { data: { user } } = await supabase.auth.getUser();
+  const { error } = await supabase.from("grades")
+    .insert({
+      user_id: user.id,
+      course_id: courseId,
+      grade: grade
+    });
+
+  if (error) {
+    console.error('Insert error:', error);
+    showNotification("خطأ في حفظ العلامة", 'error');
+    return;
+  }
+
+  showNotification("تم إضافة العلامة بنجاح");
+  await init();
+};
 
 init();

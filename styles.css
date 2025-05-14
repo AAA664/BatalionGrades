@@ -1,0 +1,210 @@
+:root {
+  --primary-color: #2e7d32;    /* Dark green */
+  --secondary-color: #4caf50;   /* Medium green */
+  --accent-color: #81c784;      /* Light green */
+  --background-color: #f1f8e9;  /* Very light green background */
+  --text-color: #1b5e20;       /* Dark green text */
+  --shadow: 0 4px 6px rgba(46, 125, 50, 0.1);
+  --transition: all 0.3s ease;
+}
+
+body, h1, h2, input, button, table {
+  margin: 0;
+  padding: 0;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+  padding: 20px;
+  background: var(--background-color);
+  color: var(--text-color);
+  direction: rtl;
+  text-align: right;
+  line-height: 1.6;
+}
+
+h1 {
+  text-align: center;
+  margin-bottom: 30px;
+  color: var(--primary-color);
+  font-size: 2.5em;
+  font-weight: 600;
+  text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+}
+
+.container, #auth, #main {
+  max-width: 500px;
+  margin: 0 auto 30px auto;
+  background: white;
+  padding: 30px;
+  border-radius: 15px;
+  box-shadow: var(--shadow);
+  transition: var(--transition);
+}
+
+.container:hover, #auth:hover, #main:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 6px 12px rgba(46, 125, 50, 0.15);
+}
+
+input[type="email"], input[type="password"], input[type="number"] {
+  width: 100%;
+  padding: 12px 15px;
+  margin: 10px 0 20px 0;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  box-sizing: border-box;
+  font-size: 16px;
+  transition: var(--transition);
+}
+
+input:focus {
+  outline: none;
+  border-color: var(--secondary-color);
+  box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.2);
+}
+
+button {
+  background-color: var(--secondary-color);
+  color: white;
+  border: none;
+  padding: 12px 25px;
+  margin: 8px 0;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: 600;
+  transition: var(--transition);
+  width: auto;
+  display: inline-block;
+}
+
+button:hover {
+  background-color: var(--primary-color);
+  transform: translateY(-2px);
+}
+
+button:active {
+  transform: translateY(0);
+}
+
+table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  margin-top: 20px;
+  background: white;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: var(--shadow);
+}
+
+th, td {
+  padding: 15px;
+  text-align: center;
+  border-bottom: 1px solid #e8f5e9;
+}
+
+th {
+  background-color: var(--primary-color);
+  color: white;
+  font-weight: 600;
+}
+
+tr:last-child td {
+  border-bottom: none;
+}
+
+tr:hover td {
+  background-color: #f1f8e9;
+}
+
+.grade-input-group {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.button-group {
+  display: flex;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+#login-error {
+  color: var(--accent-color);
+  margin-bottom: 15px;
+  padding: 10px;
+  border-radius: 8px;
+  background-color: rgba(129, 199, 132, 0.1);
+  display: none;
+}
+
+#login-error.visible {
+  display: block;
+}
+
+.notification {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  padding: 15px 25px;
+  background-color: var(--secondary-color);
+  color: white;
+  border-radius: 8px;
+  box-shadow: var(--shadow);
+  transform: translateY(-100%);
+  opacity: 0;
+  transition: all 0.3s ease;
+  z-index: 1000;
+}
+
+.notification.show {
+  transform: translateY(0);
+  opacity: 1;
+}
+
+.notification.error {
+  background-color: #e74c3c;
+}
+
+.notification.success {
+  background-color: var(--secondary-color);
+}
+
+@media (max-width: 480px) {
+  body {
+    padding: 10px;
+  }
+
+  .container, #auth, #main {
+    padding: 20px;
+    margin: 10px;
+    border-radius: 10px;
+  }
+
+  button {
+    width: 100%;
+    margin: 8px 0;
+  }
+
+  h1 {
+    font-size: 1.8em;
+  }
+
+  h2 {
+    font-size: 1.4em;
+  }
+
+  input[type="email"], input[type="password"], input[type="number"] {
+    font-size: 14px;
+    padding: 10px;
+  }
+}
