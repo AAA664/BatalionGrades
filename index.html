@@ -3,13 +3,18 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>تصنيف الدرجات</title>
+  <title>د ق ك 62</title>
   <link rel="stylesheet" href="styles.css">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="script.js"></script>
 </head>
 <body>
-  <h1>تصنيف الدرجات</h1>
+  <!-- Add this at the top of the body -->
+  <div class="loader">
+    <div class="loader-spinner"></div>
+  </div>
+
+  <h1>د ق ك 62</h1>
 
   <div id="auth">
     <h2>تسجيل الدخول</h2>
@@ -22,11 +27,23 @@
   </div>
 
   <div id="main" style="display:none;">
-    <h2>الدرجات</h2>
+    <h2>العلامات</h2>
     <div id="grade-form"></div>
-    <div class="button-group">
-      <button onclick="location.href='ranking.html'" class="primary">عرض التصنيف</button>
-      <button onclick="logout()" class="secondary">تسجيل الخروج</button>
+  </div>
+
+  <!-- Add this div for the change password form -->
+  <div id="change-password-form" style="display:none;" class="modal">
+    <div class="modal-content">
+      <h2>تغيير كلمة المرور</h2>
+      <div class="input-group">
+        <input type="password" id="current-password" placeholder="كلمة المرور الحالية" required>
+        <input type="password" id="new-password" placeholder="كلمة المرور الجديدة" required>
+        <input type="password" id="confirm-password" placeholder="تأكيد كلمة المرور الجديدة" required>
+      </div>
+      <div class="button-group">
+        <button onclick="changePassword()">حفظ</button>
+        <button onclick="hideChangePasswordForm()" class="secondary">إلغاء</button>
+      </div>
     </div>
   </div>
 </body>
