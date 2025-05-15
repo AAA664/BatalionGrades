@@ -125,16 +125,16 @@ async function init() {
     `;
 
     grades.forEach(g => {
-      const row = document.createElement("tr");
-      row.innerHTML = `
-        <td>${g.courses.code}</td>
-        <td>${g.grade}</td>
-        <td>
-          <button onclick="editGrade(${g.course_id}, ${g.grade})">تعديل</button>
-          <button onclick="deleteGrade(${g.course_id})" class="delete-btn">حذف</button>
-        </td>
-      `;
-      gradesTable.appendChild(row);
+        const row = document.createElement("tr");
+        row.innerHTML = `
+            <td>${g.courses.code}</td>
+            <td>${g.grade}</td>
+            <td>
+                <button onclick="editGrade(${g.course_id}, ${g.grade})" class="action-btn">تعديل</button>
+                <button onclick="deleteGrade(${g.course_id})" class="delete-btn">حذف</button>
+            </td>
+        `;
+        gradesTable.appendChild(row);
     });
 
     formDiv.appendChild(gradesTable);
