@@ -31,11 +31,11 @@ window.loadRankings = async () => {
     if (!await checkSession()) return;
 
     const table = document.getElementById("ranking-table");
-    table.innerHTML = '<tr><td colspan="3">جاري التحميل...</td></tr>';
+    table.innerHTML = '<tr><td colspan="4">جاري التحميل...</td></tr>';
 
     try {
       const { data: rankings, error } = await supabase
-        .from('user_rankings')
+        .from('user_rankings_with_credits')
         .select('*')
         .order('average', { ascending: false });
 
@@ -46,11 +46,12 @@ window.loadRankings = async () => {
           <th>الترتيب</th>
           <th>الاسم</th>
           <th>المعدل</th>
+          <th>المعامل</th>
         </tr>
       `;
 
       if (rankings.length === 0) {
-        table.innerHTML += '<tr><td colspan="3">لا توجد نتائج</td></tr>';
+        table.innerHTML += '<tr><td colspan="4">لا توجد نتائج</td></tr>';
         return;
       }
 
@@ -60,13 +61,14 @@ window.loadRankings = async () => {
           <tr>
             <td>${i + 1}</td>
             <td>${username}</td>
-            <td>${r.average.toFixed(2)}</td>
+            <td>${r.average.toFixed(5)}</td>
+            <td>${r.total_credits}</td>
           </tr>
         `;
       });
     } catch (err) {
       console.error('Error loading rankings:', err);
-      table.innerHTML = '<tr><td colspan="3">حدث خطأ في تحميل النتائج</td></tr>';
+      table.innerHTML = '<tr><td colspan="4">حدث خطأ في تحميل النتائج</td></tr>';
     }
   } finally {
     hideLoader();
