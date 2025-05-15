@@ -65,6 +65,11 @@ window.login = async () => {
     }
 
     if (data.user) {
+      // Check if admin user
+      if (data.user.email.endsWith('@admin.com')) {
+        location.href = 'admin.html';
+        return;
+      }
       showNotification("تم تسجيل الدخول بنجاح");
       await init();
     }
@@ -126,6 +131,7 @@ async function init() {
         <td>${g.grade}</td>
         <td>
           <button onclick="editGrade(${g.course_id}, ${g.grade})">تعديل</button>
+          <button onclick="deleteGrade(${g.course_id})" class="delete-btn">حذف</button>
         </td>
       `;
       gradesTable.appendChild(row);
@@ -382,6 +388,32 @@ window.changePassword = async () => {
   } finally {
     hideLoader();
   }
+};
+
+// Add delete grade function after other window functions
+window.deleteGrade = async (courseId) => {
+    if (!confirm('هل أنت متأكد من حذف هذه العلامة؟')) return;
+    
+    try {
+        showLoader();
+        const { data: { user } } = await supabase.auth.getUser();
+        
+        const { error } = await supabase
+            .from('grades')
+            .delete()
+            .match({ user_id: user.id, course_id: courseId });
+
+        if (error) {
+            console.error('Delete error:', error);
+            showNotification("خطأ في حذف العلامة", 'error');
+            return;
+        }
+
+        showNotification("تم حذف العلامة بنجاح");
+        await init();
+    } finally {
+        hideLoader();
+    }
 };
 
 init();

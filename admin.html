@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>د ق ك 62 - لوحة الإدارة</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="admin.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="admin.js"></script>
+</head>
+<body>
+    <div class="loader">
+        <div class="loader-spinner"></div>
+    </div>
+
+    <h1>لوحة الإدارة - د ق ك 62</h1>
+
+    <div class="admin-container">
+        <div class="admin-nav">
+            <button onclick="showSection('users')">إدارة المستخدمين</button>
+            <button onclick="showSection('courses')">إدارة المواد</button>
+            <button onclick="showSection('grades')">إدارة العلامات</button>
+            <button onclick="location.href='index.html'">العودة للرئيسية</button>
+            <button onclick="logout()" class="danger">تسجيل الخروج</button>
+        </div>
+
+        <div id="users-section" class="admin-section">
+            <h2>إدارة المستخدمين</h2>
+            <div class="action-bar">
+                <button onclick="showAddUserForm()">إضافة مستخدم جديد</button>
+            </div>
+            <table id="users-table"></table>
+        </div>
+
+        <div id="courses-section" class="admin-section">
+            <h2>إدارة المواد</h2>
+            <div class="action-bar">
+                <button onclick="showAddCourseForm()">إضافة مادة جديدة</button>
+            </div>
+            <table id="courses-table"></table>
+        </div>
+
+        <div id="grades-section" class="admin-section">
+            <h2>إدارة العلامات</h2>
+            <table id="grades-table"></table>
+        </div>
+    </div>
+
+    <!-- Add User Modal -->
+    <div id="add-user-modal" class="modal">
+        <div class="modal-content">
+            <h2>إضافة مستخدم جديد</h2>
+            <div class="input-group">
+                <input type="email" id="new-user-email" placeholder="البريد الإلكتروني">
+                <input type="password" id="new-user-password" placeholder="كلمة المرور">
+            </div>
+            <div class="button-group">
+                <button onclick="addUser()">إضافة</button>
+                <button onclick="hideModal('add-user-modal')" class="secondary">إلغاء</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Course Modal -->
+    <div id="add-course-modal" class="modal">
+        <div class="modal-content">
+            <h2>إضافة مادة جديدة</h2>
+            <div class="input-group">
+                <input type="text" id="course-code" placeholder="رمز المادة">
+                <input type="text" id="course-name" placeholder="اسم المادة">
+                <input type="number" id="course-credit" placeholder="عدد الساعات" min="1" max="4">
+            </div>
+            <div class="button-group">
+                <button onclick="addCourse()">إضافة</button>
+                <button onclick="hideModal('add-course-modal')" class="secondary">إلغاء</button>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
