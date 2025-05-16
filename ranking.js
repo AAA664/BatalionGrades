@@ -56,7 +56,6 @@ window.loadRankings = async () => {
 
       if (rankings.length === 0) {
         table.innerHTML += '<tr><td colspan="4">لا توجد نتائج</td></tr>';
-        document.getElementById('user-rank-info').textContent = '';
         return;
       }
 
@@ -74,12 +73,21 @@ window.loadRankings = async () => {
           </tr>
         `;
       });
+
       // Show user rank info
-      const userRankInfo = document.getElementById('user-rank-info');
+      let rankInfo = document.getElementById('user-rank-info');
+      if (!rankInfo) {
+        rankInfo = document.createElement('div');
+        rankInfo.id = 'user-rank-info';
+        rankInfo.style.margin = '15px 0';
+        rankInfo.style.fontWeight = 'bold';
+        rankInfo.style.color = 'var(--primary-color)';
+        table.parentNode.insertBefore(rankInfo, table);
+      }
       if (userRank) {
-        userRankInfo.textContent = `ترتيبك الحالي: ${userRank} من ${rankings.length}`;
+        rankInfo.textContent = `ترتيبك الحالي: ${userRank} من ${rankings.length}`;
       } else {
-        userRankInfo.textContent = '';
+        rankInfo.textContent = '';
       }
     } catch (err) {
       console.error('Error loading rankings:', err);

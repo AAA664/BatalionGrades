@@ -42,109 +42,6 @@ async function checkSession() {
   return true;
 }
 
-// --- Input Validation Helpers ---
-function isValidEmail(email) {
-  return /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email);
-}
-function isValidPassword(password) {
-  return password.length >= 6;
-}
-function isValidGrade(grade) {
-  const n = Number(grade);
-  return !isNaN(n) && n >= 0 && n <= 100;
-}
-
-// --- Session Timeout ---
-let sessionTimeout, warningTimeout;
-function resetSessionTimer() {
-  clearTimeout(sessionTimeout);
-  clearTimeout(warningTimeout);
-  warningTimeout = setTimeout(() => {
-    showNotification('ستنتهي الجلسة خلال دقيقة بسبب عدم النشاط', 'error');
-  }, 29 * 60 * 1000); // 29 min
-  sessionTimeout = setTimeout(() => {
-    showNotification('تم تسجيل الخروج تلقائياً بسبب عدم النشاط', 'error');
-    supabase.auth.signOut();
-    location.reload();
-  }, 30 * 60 * 1000); // 30 min
-}
-document.addEventListener('mousemove', resetSessionTimer);
-document.addEventListener('keydown', resetSessionTimer);
-resetSessionTimer();
-
-// --- Profile/Account Menu ---
-function createProfileMenu(user) {
-  let menu = document.getElementById('profile-menu');
-  if (!menu) {
-    menu = document.createElement('div');
-    menu.id = 'profile-menu';
-    menu.style.position = 'fixed';
-    menu.style.top = '20px';
-    menu.style.left = '20px';
-    menu.style.background = '#fff';
-    menu.style.border = '1px solid #e0e0e0';
-    menu.style.borderRadius = '8px';
-    menu.style.padding = '10px 20px';
-    menu.style.zIndex = '1001';
-    menu.style.boxShadow = 'var(--shadow)';
-    menu.innerHTML = `<b>${user.email}</b><br><button onclick="showChangePasswordForm()">تغيير كلمة المرور</button><br><button onclick="logout()">تسجيل الخروج</button>`;
-    document.body.appendChild(menu);
-  }
-}
-
-// --- Chart.js for Grades ---
-function renderGradesChart(grades) {
-  if (!window.Chart) return;
-  let chartDiv = document.getElementById('grades-chart');
-  if (!chartDiv) {
-    chartDiv = document.createElement('div');
-    chartDiv.id = 'grades-chart';
-    chartDiv.style.margin = '30px 0';
-    document.getElementById('main').prepend(chartDiv);
-  }
-  chartDiv.innerHTML = '<canvas id="gradesChartCanvas"></canvas>';
-  const ctx = document.getElementById('gradesChartCanvas').getContext('2d');
-  const labels = grades.map(g => g.courses.code);
-  const data = grades.map(g => g.grade);
-  if (window._gradesChart) window._gradesChart.destroy();
-  window._gradesChart = new Chart(ctx, {
-    type: 'bar',
-    data: {
-      labels,
-      datasets: [{
-        label: 'العلامة',
-        data,
-        backgroundColor: 'rgba(76,175,80,0.7)'
-      }]
-    },
-    options: {
-      responsive: true,
-      plugins: { legend: { display: false } }
-    }
-  });
-}
-
-// --- Custom Confirmation Modal ---
-function showConfirmModal(message, onConfirm) {
-  let modal = document.getElementById('confirm-modal');
-  if (!modal) {
-    modal = document.createElement('div');
-    modal.id = 'confirm-modal';
-    modal.className = 'confirm-modal';
-    modal.innerHTML = `<div class="modal-content"><div id="confirm-message"></div><div class="button-group"><button id="confirm-yes">نعم</button><button id="confirm-no" class="secondary">إلغاء</button></div></div>`;
-    document.body.appendChild(modal);
-  }
-  document.getElementById('confirm-message').textContent = message;
-  modal.classList.add('show');
-  document.getElementById('confirm-yes').onclick = () => {
-    modal.classList.remove('show');
-    onConfirm();
-  };
-  document.getElementById('confirm-no').onclick = () => {
-    modal.classList.remove('show');
-  };
-}
-
 // Login function
 window.login = async () => {
   try {
@@ -152,12 +49,8 @@ window.login = async () => {
     const email = document.getElementById("email").value;
     const password = document.getElementById("password").value;
     
-    if (!isValidEmail(email)) {
-      showNotification('البريد الإلكتروني غير صالح', 'error');
-      return;
-    }
-    if (!isValidPassword(password)) {
-      showNotification('كلمة المرور يجب أن تكون 6 أحرف على الأقل', 'error');
+    if (!email || !password) {
+      showNotification("الرجاء إدخال البريد الإلكتروني وكلمة المرور", 'error');
       return;
     }
 
@@ -193,7 +86,49 @@ window.logout = async () => {
   location.reload();
 };
 
-// Modify init() to use validation, feedback, chart, and profile menu
+// Chart.js: Render grades bar chart
+function renderGradesChart(grades) {
+  const chartSection = document.getElementById('grades-chart-section');
+  if (!grades || grades.length === 0) {
+    if (chartSection) chartSection.style.display = 'none';
+    if (window.gradesChart) { window.gradesChart.destroy(); window.gradesChart = null; }
+    return;
+  }
+  if (chartSection) chartSection.style.display = 'block';
+  const ctx = document.getElementById('grades-chart').getContext('2d');
+  if (window.gradesChart) { window.gradesChart.destroy(); window.gradesChart = null; }
+  const labels = grades.map(g => g.courses && g.courses.code ? g.courses.code : '');
+  const data = grades.map(g => g.grade);
+  window.gradesChart = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: labels,
+      datasets: [{
+        label: 'العلامة',
+        data: data,
+        backgroundColor: 'rgba(76, 175, 80, 0.7)',
+        borderColor: 'rgba(46, 125, 50, 1)',
+        borderWidth: 1
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: true,
+      aspectRatio: 2.5,
+      scales: {
+        y: {
+          beginAtZero: true,
+          max: 20
+        }
+      },
+      plugins: {
+        legend: { display: false }
+      }
+    }
+  });
+}
+
+// Modify init() to use session check and call renderGradesChart
 async function init() {
   try {
     showLoader();
@@ -209,8 +144,6 @@ async function init() {
     const username = user.email.split('@')[0];
     document.querySelector('h1').textContent = `د ق ك 62 - ${username}`;
 
-    createProfileMenu(user);
-
     // Fetch courses and grades for the user
     const { data: courses } = await supabase.from("courses").select("*");
     const { data: grades } = await supabase.from("grades")
@@ -219,8 +152,6 @@ async function init() {
 
     // Sort grades by course code instead of name
     grades.sort((a, b) => a.courses.code.localeCompare(b.courses.code));
-
-    renderGradesChart(grades);
 
     const formDiv = document.getElementById("grade-form");
     formDiv.innerHTML = "";
@@ -317,6 +248,8 @@ async function init() {
     buttonGroup.appendChild(logoutButton);
 
     formDiv.appendChild(buttonGroup);
+
+    await renderGradesChart(grades);
   } finally {
     hideLoader();
   }
@@ -326,13 +259,15 @@ async function init() {
 window.editGrade = async (courseId, currentGrade) => {
   try {
     showLoader();
-    const newGrade = prompt('أدخل العلامة الجديدة (0-100):', currentGrade);
-    if (!isValidGrade(newGrade)) {
-      showNotification('الرجاء إدخال علامة صحيحة بين 0 و 100', 'error');
+    const newGrade = prompt(`أدخل العلامة الجديدة (${currentGrade}):`, currentGrade);
+    if (newGrade === null) return;
+
+    const grade = parseFloat(newGrade);
+    if (isNaN(grade) || grade < 0 || grade > 20) {
+      showNotification("الرجاء إدخال علامة صحيحة بين 0 و 20", 'error');
       return;
     }
 
-    const grade = parseFloat(newGrade);
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) {
       showNotification("يرجى تسجيل الدخول أولاً", 'error');
@@ -370,7 +305,7 @@ window.addNewGrade = async () => {
       return;
     }
 
-    if (!isValidGrade(grade)) {
+    if (isNaN(grade) || grade < 0 || grade > 100) {
       showNotification("الرجاء إدخال درجة صحيحة بين 0 و 100", 'error');
       return;
     }
@@ -434,7 +369,7 @@ window.changePassword = async () => {
       return;
     }
 
-    if (!isValidPassword(newPassword)) {
+    if (newPassword.length < 6) {
       showNotification('كلمة المرور الجديدة يجب أن تكون 6 أحرف على الأقل', 'error');
       return;
     }
@@ -491,17 +426,38 @@ window.changePassword = async () => {
         showNotification('حدث خطأ في تحديث كلمة المرور', 'error');
       }
     } catch (err) {
-      console.error('Change password error:', err);
-      showNotification('حدث خطأ غير متوقع', 'error');
+      console.error('Password change error:', err);
+      showNotification('حدث خطأ في تغيير كلمة المرور', 'error');
     }
   } finally {
     hideLoader();
   }
 };
 
-// --- Add Chart.js CDN if not present ---
-if (!window.Chart) {
-  const script = document.createElement('script');
-  script.src = 'https://cdn.jsdelivr.net/npm/chart.js';
-  document.head.appendChild(script);
+// Add delete grade function after other window functions
+window.deleteGrade = async (courseId) => {
+    if (!confirm('هل أنت متأكد من حذف هذه العلامة؟')) return;
+    
+    try {
+        showLoader();
+        const { data: { user } } = await supabase.auth.getUser();
+        
+        const { error } = await supabase
+            .from('grades')
+            .delete()
+            .match({ user_id: user.id, course_id: courseId });
+
+        if (error) {
+            console.error('Delete error:', error);
+            showNotification("خطأ في حذف العلامة", 'error');
+            return;
+        }
+
+        showNotification("تم حذف العلامة بنجاح");
+        await init();
+    } finally {
+        hideLoader();
+    }
 }
+
+init();

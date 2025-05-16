@@ -119,57 +119,6 @@ tr:hover td {
   background-color: #f1f8e9;
 }
 
-/* Responsive table container */
-.table-responsive {
-  width: 100%;
-  overflow-x: auto;
-}
-
-@media (max-width: 600px) {
-  .container, #auth, #main {
-    padding: 10px;
-    margin: 5px;
-    border-radius: 8px;
-    max-width: 100vw;
-    box-sizing: border-box;
-  }
-  table {
-    font-size: 13px;
-    min-width: 480px;
-    width: 100%;
-    display: block;
-    overflow-x: auto;
-    border-radius: 8px;
-  }
-  .table-responsive {
-    width: 100vw;
-    overflow-x: auto;
-    margin: 0 -10px;
-  }
-  th, td {
-    padding: 8px 4px;
-    font-size: 13px;
-    white-space: nowrap;
-  }
-  tr {
-    display: table-row;
-  }
-  .button-group, .input-group {
-    flex-direction: column;
-    gap: 6px;
-  }
-  button, input, select {
-    width: 100%;
-    font-size: 15px;
-    box-sizing: border-box;
-  }
-  #grades-chart, #grades-chart-section {
-    max-width: 100vw;
-    min-width: 0;
-    padding: 0;
-  }
-}
-
 .grade-input-group {
   display: flex;
   gap: 10px;
@@ -202,7 +151,7 @@ tr:hover td {
   display: block;
 }
 
-notification {
+.notification {
   position: fixed;
   top: 20px;
   right: 20px;
@@ -259,6 +208,38 @@ notification {
   opacity: 1;
 }
 
+.chart-container, #grades-chart-section {
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+  background: #f8faf7;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(46,125,50,0.06);
+  padding: 18px 10px 10px 10px;
+  height: 220px;
+  min-height: 180px;
+  display: block;
+}
+
+#grades-chart {
+  width: 100% !important;
+  height: 180px !important;
+  max-width: 100%;
+  display: block;
+}
+
+@media (max-width: 600px) {
+  .chart-container, #grades-chart-section {
+    max-width: 100vw;
+    min-width: 0;
+    padding: 8px 0 0 0;
+    height: 180px;
+  }
+  #grades-chart {
+    height: 140px !important;
+  }
+}
+
 @media (max-width: 480px) {
   body {
     padding: 10px;
@@ -311,12 +292,12 @@ notification {
 }
 
 .loader-spinner {
-  width: 60px;
-  height: 60px;
-  border: 6px solid var(--primary-color);
-  border-top: 6px solid var(--accent-color);
+  width: 50px;
+  height: 50px;
+  border: 5px solid var(--primary-color);
+  border-top: 5px solid transparent;
   border-radius: 50%;
-  animation: spin 0.7s linear infinite;
+  animation: spin 1s linear infinite;
 }
 
 @keyframes spin {
@@ -343,62 +324,4 @@ notification {
 .highlight-row {
     background-color: var(--accent-color) !important;
     font-weight: bold;
-}
-
-/* Secondary button style */
-button.secondary, .button-group .secondary {
-  background-color: #e0e0e0;
-  color: var(--primary-color);
-  border: 1px solid #bdbdbd;
-  font-weight: 600;
-}
-button.secondary:hover, .button-group .secondary:hover {
-  background-color: #bdbdbd;
-  color: #fff;
-}
-
-/* Profile/account menu */
-#profile-menu {
-  min-width: 180px;
-  box-shadow: var(--shadow);
-  background: #fff;
-  border: 1px solid #e0e0e0;
-  border-radius: 8px;
-  padding: 10px 20px;
-  z-index: 1001;
-  font-size: 15px;
-}
-#profile-menu button {
-  width: 100%;
-  margin: 8px 0 0 0;
-  background: var(--secondary-color);
-  color: #fff;
-}
-
-/* Confirmation modal */
-.confirm-modal {
-  display: none;
-  position: fixed;
-  top: 0; left: 0; width: 100%; height: 100%;
-  background: rgba(0,0,0,0.4);
-  z-index: 2000;
-  justify-content: center;
-  align-items: center;
-}
-.confirm-modal.show {
-  display: flex;
-}
-.confirm-modal .modal-content {
-  background: #fff;
-  padding: 30px 20px;
-  border-radius: 10px;
-  min-width: 250px;
-  text-align: center;
-  box-shadow: var(--shadow);
-}
-.confirm-modal .button-group {
-  margin-top: 20px;
-  display: flex;
-  gap: 10px;
-  justify-content: center;
 }
