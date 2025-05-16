@@ -30,6 +30,10 @@ window.loadRankings = async () => {
     showLoader();
     if (!await checkSession()) return;
 
+    // Get current user
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+    if (userError) throw userError;
+
     const table = document.getElementById("ranking-table");
     table.innerHTML = '<tr><td colspan="4">جاري التحميل...</td></tr>';
 
@@ -52,13 +56,17 @@ window.loadRankings = async () => {
 
       if (rankings.length === 0) {
         table.innerHTML += '<tr><td colspan="4">لا توجد نتائج</td></tr>';
+        document.getElementById('user-rank-info').textContent = '';
         return;
       }
 
+      let userRank = null;
       rankings.forEach((r, i) => {
         const username = r.email.split('@')[0];
+        const isCurrentUser = r.email === user.email;
+        if (isCurrentUser) userRank = i + 1;
         table.innerHTML += `
-          <tr>
+          <tr class="${isCurrentUser ? 'highlight-row' : ''}">
             <td>${i + 1}</td>
             <td>${username}</td>
             <td>${r.average.toFixed(5)}</td>
@@ -66,6 +74,13 @@ window.loadRankings = async () => {
           </tr>
         `;
       });
+      // Show user rank info
+      const userRankInfo = document.getElementById('user-rank-info');
+      if (userRank) {
+        userRankInfo.textContent = `ترتيبك الحالي: ${userRank} من ${rankings.length}`;
+      } else {
+        userRankInfo.textContent = '';
+      }
     } catch (err) {
       console.error('Error loading rankings:', err);
       table.innerHTML = '<tr><td colspan="4">حدث خطأ في تحميل النتائج</td></tr>';
