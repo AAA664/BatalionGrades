@@ -208,35 +208,69 @@ tr:hover td {
   opacity: 1;
 }
 
-.chart-container, #grades-chart-section {
-  max-width: 600px;
-  margin-left: auto;
-  margin-right: auto;
+#grades-chart-section {
+  width: 100%;
+  max-width: 100%;
+  margin: 0 auto 20px auto;
   background: #f8faf7;
   border-radius: 12px;
   box-shadow: 0 2px 8px rgba(46,125,50,0.06);
-  padding: 18px 10px 10px 10px;
-  height: 220px;
-  min-height: 180px;
+  padding: 20px 20px 20px 20px;
+  height: auto;
+  min-height: 300px;
   display: block;
+  transition: all 0.3s ease;
+  box-sizing: border-box;
 }
 
 #grades-chart {
   width: 100% !important;
-  height: 180px !important;
-  max-width: 100%;
+  height: 100% !important;
+  min-height: 280px;
   display: block;
 }
 
+.grades-table-wrapper {
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  background: white;
+  border-radius: 12px;
+  box-shadow: var(--shadow);
+}
+
 @media (max-width: 600px) {
-  .chart-container, #grades-chart-section {
-    max-width: 100vw;
-    min-width: 0;
-    padding: 8px 0 0 0;
-    height: 180px;
+  #grades-chart-section {
+    padding: 15px;
+    margin: 10px 0;
+    min-height: 250px;
+    border-radius: 8px;
   }
+  
   #grades-chart {
-    height: 140px !important;
+    min-height: 230px;
+  }
+
+  .grades-table-wrapper {
+    border-radius: 8px;
+    margin: 10px 0;
+  }
+
+  table {
+    min-width: 100%;
+    font-size: 14px;
+  }
+
+  th, td {
+    padding: 12px 8px;
+  }
+
+  .action-btn, .delete-btn {
+    padding: 6px 12px;
+    font-size: 13px;
+    min-width: auto;
   }
 }
 
@@ -267,6 +301,28 @@ tr:hover td {
   input[type="email"], input[type="password"], input[type="number"] {
     font-size: 14px;
     padding: 10px;
+  }
+
+  #grades-chart-section {
+    padding: 12px;
+    min-height: 220px;
+  }
+  
+  #grades-chart {
+    min-height: 200px;
+  }
+
+  table {
+    font-size: 13px;
+  }
+
+  th, td {
+    padding: 10px 6px;
+  }
+
+  .action-btn, .delete-btn {
+    padding: 5px 10px;
+    font-size: 12px;
   }
 }
 

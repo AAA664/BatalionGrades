@@ -86,7 +86,7 @@ window.logout = async () => {
   location.reload();
 };
 
-// Chart.js: Render grades bar chart
+// Chart.js: Render grades line chart
 function renderGradesChart(grades) {
   const chartSection = document.getElementById('grades-chart-section');
   if (!grades || grades.length === 0) {
@@ -100,29 +100,54 @@ function renderGradesChart(grades) {
   const labels = grades.map(g => g.courses && g.courses.code ? g.courses.code : '');
   const data = grades.map(g => g.grade);
   window.gradesChart = new Chart(ctx, {
-    type: 'bar',
+    type: 'line',
     data: {
       labels: labels,
       datasets: [{
         label: 'العلامة',
         data: data,
-        backgroundColor: 'rgba(76, 175, 80, 0.7)',
+        backgroundColor: 'rgba(76, 175, 80, 0.1)',
         borderColor: 'rgba(46, 125, 50, 1)',
-        borderWidth: 1
+        borderWidth: 2,
+        tension: 0.3,
+        fill: true,
+        pointBackgroundColor: 'rgba(46, 125, 50, 1)',
+        pointBorderColor: '#fff',
+        pointBorderWidth: 2,
+        pointRadius: 5,
+        pointHoverRadius: 7
       }]
     },
     options: {
       responsive: true,
-      maintainAspectRatio: true,
-      aspectRatio: 2.5,
+      maintainAspectRatio: false,
       scales: {
         y: {
           beginAtZero: true,
-          max: 20
+          max: 20,
+          grid: {
+            color: 'rgba(0, 0, 0, 0.1)'
+          }
+        },
+        x: {
+          grid: {
+            display: false
+          }
         }
       },
       plugins: {
-        legend: { display: false }
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: 'rgba(0, 0, 0, 0.8)',
+          titleColor: '#fff',
+          bodyColor: '#fff',
+          padding: 10,
+          displayColors: false
+        }
+      },
+      interaction: {
+        mode: 'index',
+        intersect: false
       }
     }
   });
@@ -179,7 +204,10 @@ async function init() {
         gradesTable.appendChild(row);
     });
 
-    formDiv.appendChild(gradesTable);
+    const wrapper = document.createElement("div");
+    wrapper.className = "grades-table-wrapper";
+    wrapper.appendChild(gradesTable);
+    formDiv.appendChild(wrapper);
 
     // Create "Add Grade" button and course selection
     const addGradeDiv = document.createElement("div");
