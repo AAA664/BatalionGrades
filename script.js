@@ -93,8 +93,17 @@ function renderGradesChart(grades) {
     if (chartSection) chartSection.style.display = 'none';
     if (window.gradesChart) { window.gradesChart.destroy(); window.gradesChart = null; }
     return;
+  }  if (chartSection) {
+    chartSection.style.display = 'block';
+    // Add or update title
+    let titleDiv = chartSection.querySelector('.chart-title');
+    if (!titleDiv) {
+      titleDiv = document.createElement('div');
+      titleDiv.className = 'chart-title';
+      chartSection.insertBefore(titleDiv, chartSection.firstChild);
+    }
+    titleDiv.textContent = 'رسم بياني للعلامات';
   }
-  if (chartSection) chartSection.style.display = 'block';
   const ctx = document.getElementById('grades-chart').getContext('2d');
   if (window.gradesChart) { window.gradesChart.destroy(); window.gradesChart = null; }
   const labels = grades.map(g => g.courses && g.courses.code ? g.courses.code : '');
@@ -120,8 +129,7 @@ function renderGradesChart(grades) {
     },
     options: {
       responsive: true,
-      maintainAspectRatio: false,
-      scales: {
+      maintainAspectRatio: false,      scales: {
         y: {
           beginAtZero: true,
           max: 20,
@@ -132,6 +140,13 @@ function renderGradesChart(grades) {
         x: {
           grid: {
             display: false
+          },
+          ticks: {
+            maxRotation: 45,
+            minRotation: 45,
+            display: window.innerWidth > 600, // Hide labels on mobile
+            autoSkip: true,
+            maxTicksLimit: 10
           }
         }
       },
@@ -148,6 +163,124 @@ function renderGradesChart(grades) {
       interaction: {
         mode: 'index',
         intersect: false
+      }
+    }
+  });
+}
+
+// Render weighted average impact chart
+function renderWeightedAverageChart(grades) {
+  const impactChartSection = document.getElementById('impact-chart-section');
+  if (!grades || grades.length === 0) {
+    if (impactChartSection) impactChartSection.style.display = 'none';
+    if (window.impactChart) { window.impactChart.destroy(); window.impactChart = null; }
+    return;
+  }
+
+  // Calculate total credits and current weighted average
+  const totalCredits = grades.reduce((sum, g) => sum + (g.courses.credit || 0), 0);
+  const currentWeightedAvg = grades.reduce((sum, g) => sum + (g.grade * (g.courses.credit || 0)), 0) / totalCredits;
+
+  // Calculate impact of each grade
+  const labels = grades.map(g => g.courses.code);
+  const impacts = grades.map(g => {
+    // Calculate average without this grade
+    const otherGradesSum = grades.reduce((sum, other) => {
+      if (other.course_id === g.course_id) return sum;
+      return sum + (other.grade * (other.courses.credit || 0));
+    }, 0);
+    const otherCredits = totalCredits - (g.courses.credit || 0);
+    const avgWithout = otherCredits > 0 ? otherGradesSum / otherCredits : 0;
+    // Impact is the difference from the current average
+    return (currentWeightedAvg - avgWithout).toFixed(2);
+  });
+  // Create or get the impact chart section
+  if (!impactChartSection) {
+    const newSection = document.createElement('div');
+    newSection.id = 'impact-chart-section';
+    document.getElementById('grades-chart-section').insertAdjacentElement('afterend', newSection);
+    
+    const titleDiv = document.createElement('div');
+    titleDiv.className = 'chart-title';
+    titleDiv.textContent = 'مدى تأثير علامات المواد على التصنيف';
+    newSection.appendChild(titleDiv);
+    
+    const canvas = document.createElement('canvas');
+    canvas.id = 'impact-chart';
+    newSection.appendChild(canvas);
+  } else {
+    // Update or add title if it doesn't exist
+    let titleDiv = impactChartSection.querySelector('.chart-title');
+    if (!titleDiv) {
+      titleDiv = document.createElement('div');
+      titleDiv.className = 'chart-title';
+      impactChartSection.insertBefore(titleDiv, impactChartSection.firstChild);
+    }
+    titleDiv.textContent = 'مدى تأثير علامات المواد على التصنيف';
+  }
+
+  const ctx = document.getElementById('impact-chart').getContext('2d');
+  if (window.impactChart) { window.impactChart.destroy(); }
+
+  window.impactChart = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: labels,
+      datasets: [{
+        label: 'تأثير المادة على المعدل',
+        data: impacts,
+        backgroundColor: impacts.map(impact => 
+          parseFloat(impact) >= 0 ? 'rgba(76, 175, 80, 0.7)' : 'rgba(244, 67, 54, 0.7)'
+        ),
+        borderColor: impacts.map(impact => 
+          parseFloat(impact) >= 0 ? 'rgba(46, 125, 50, 1)' : 'rgba(211, 47, 47, 1)'
+        ),
+        borderWidth: 1
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      scales: {
+        y: {
+          beginAtZero: true,
+          grid: {
+            color: 'rgba(0, 0, 0, 0.1)'
+          }
+        },
+        x: {
+          grid: {
+            display: false
+          },
+          ticks: {
+            maxRotation: 45,
+            minRotation: 45,
+            display: window.innerWidth > 600,
+            autoSkip: true,
+            maxTicksLimit: 10
+          }
+        }
+      },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: 'rgba(0, 0, 0, 0.8)',
+          titleColor: '#fff',
+          bodyColor: '#fff',
+          padding: 10,
+          displayColors: false,
+          callbacks: {
+            label: function(context) {
+              const impact = parseFloat(context.raw);
+              const grade = grades[context.dataIndex];
+              return [
+                `تأثير على المعدل: ${impact > 0 ? '+' : ''}${impact}`,
+                `العلامة: ${grade.grade}`,
+                `المعامل: ${grade.courses.credit || 0}`
+              ];
+            }
+          }
+        }
       }
     }
   });
@@ -278,6 +411,7 @@ async function init() {
     formDiv.appendChild(buttonGroup);
 
     await renderGradesChart(grades);
+    await renderWeightedAverageChart(grades);
   } finally {
     hideLoader();
   }

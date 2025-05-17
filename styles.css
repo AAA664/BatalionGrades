@@ -208,26 +208,32 @@ tr:hover td {
   opacity: 1;
 }
 
-#grades-chart-section {
+#grades-chart-section, #impact-chart-section {
   width: 100%;
   max-width: 100%;
   margin: 0 auto 20px auto;
   background: #f8faf7;
   border-radius: 12px;
   box-shadow: 0 2px 8px rgba(46,125,50,0.06);
-  padding: 20px 20px 20px 20px;
-  height: auto;
-  min-height: 300px;
+  padding: 20px;
+  height: 250px;
   display: block;
   transition: all 0.3s ease;
   box-sizing: border-box;
 }
 
-#grades-chart {
+#grades-chart, #impact-chart {
   width: 100% !important;
-  height: 100% !important;
-  min-height: 280px;
+  height: 200px !important;
   display: block;
+}
+
+.chart-title {
+  text-align: center;
+  color: var(--primary-color);
+  font-size: 1.2em;
+  font-weight: 600;
+  margin-bottom: 15px;
 }
 
 .grades-table-wrapper {
@@ -242,14 +248,14 @@ tr:hover td {
 }
 
 @media (max-width: 600px) {
-  #grades-chart-section {
+  #grades-chart-section, #impact-chart-section {
     padding: 15px;
     margin: 10px 0;
     min-height: 250px;
     border-radius: 8px;
   }
   
-  #grades-chart {
+  #grades-chart, #impact-chart {
     min-height: 230px;
   }
 
@@ -303,13 +309,18 @@ tr:hover td {
     padding: 10px;
   }
 
-  #grades-chart-section {
+  #grades-chart-section, #impact-chart-section {
     padding: 12px;
     min-height: 220px;
   }
   
-  #grades-chart {
+  #grades-chart, #impact-chart {
     min-height: 200px;
+  }
+
+  .chart-title {
+    font-size: 1.1em;
+    margin-bottom: 10px;
   }
 
   table {
