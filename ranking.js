@@ -44,7 +44,7 @@ window.loadRankings = async () => {
       if (error) throw error;      table.innerHTML = `
         <tr>          <th>الترتيب</th>
           <th>الاسم</th>
-          <th>المعاملات المنجزة</th>
+          <th>المواد المنجزة</th>
           <th>المعدل</th>
         </tr>
       `;
@@ -61,10 +61,9 @@ window.loadRankings = async () => {
         if (isCurrentUser) userRank = i + 1;
         
         // Format the average display
-        let averageDisplay;        if (r.visible_average !== null) {          averageDisplay = r.average.toFixed(5);
-        } else if (isCurrentUser) {
+        let averageDisplay;        if (r.visible_average !== null) {          averageDisplay = r.average.toFixed(5);        } else if (isCurrentUser) {
           averageDisplay = r.average.toFixed(5);
-        } else {          averageDisplay = `<span class="masked-average" title="أدخل معاملات تساوي ${r.max_student_credits} على الأقل لرؤية معدلات الآخرين">***</span>`;
+        } else {          averageDisplay = `<span class="masked-average" title="أدخل علامات بمعاملات تساوي ${r.max_student_credits} على الأقل لرؤية معدلات الآخرين">***</span>`;
         }        // Calculate completion progress and style it based on credits entered
         const creditsStyle = `color: ${r.total_credits >= r.max_student_credits ? 'var(--secondary-color)' : '#e74c3c'};`;
         
@@ -88,7 +87,7 @@ window.loadRankings = async () => {
         table.parentNode.insertBefore(rankInfo, table);
       }      if (userRank) {
         const userStats = rankings.find(r => r.email === user.email);
-        rankInfo.textContent = `ترتيبك الحالي: ${userRank} من ${rankings.length} | المعاملات المنجزة: ${userStats.total_credits}/${userStats.total_possible_credits}`;
+        rankInfo.textContent = `ترتيبك الحالي: ${userRank} من ${rankings.length} | المواد المنجزة: ${userStats.total_credits}/${userStats.total_possible_credits}`;
         
         // Add message if credits are less than maximum
         if (userStats.total_credits < userStats.max_student_credits) {
