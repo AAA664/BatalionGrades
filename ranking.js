@@ -37,25 +37,20 @@ window.loadRankings = async () => {
     const table = document.getElementById("ranking-table");
     table.innerHTML = '<tr><td colspan="4">جاري التحميل...</td></tr>';
 
-    try {
-      const { data: rankings, error } = await supabase
-        .from('user_rankings_with_credits')
-        .select('*')
-        .order('average', { ascending: false });
+    try {    const { data: rankings, error } = await supabase
+        .from('user_rankings_view')
+        .select('*');
 
-      if (error) throw error;
-
-      table.innerHTML = `
-        <tr>
-          <th>الترتيب</th>
+      if (error) throw error;      table.innerHTML = `
+        <tr>          <th>الترتيب</th>
           <th>الاسم</th>
+          <th>المعاملات المنجزة</th>
           <th>المعدل</th>
-          <th>المعامل</th>
         </tr>
       `;
 
       if (rankings.length === 0) {
-        table.innerHTML += '<tr><td colspan="4">لا توجد نتائج</td></tr>';
+        table.innerHTML += '<tr><td colspan="5">لا توجد نتائج</td></tr>';
         return;
       }
 
@@ -64,12 +59,20 @@ window.loadRankings = async () => {
         const username = r.email.split('@')[0];
         const isCurrentUser = r.email === user.email;
         if (isCurrentUser) userRank = i + 1;
+        
+        // Format the average display
+        let averageDisplay;        if (r.visible_average !== null) {          averageDisplay = r.average.toFixed(5);
+        } else if (isCurrentUser) {
+          averageDisplay = r.average.toFixed(5);
+        } else {          averageDisplay = `<span class="masked-average" title="أدخل معاملات تساوي ${r.max_student_credits} على الأقل لرؤية معدلات الآخرين">***</span>`;
+        }        // Calculate completion progress and style it based on credits entered
+        const creditsStyle = `color: ${r.total_credits >= r.max_student_credits ? 'var(--secondary-color)' : '#e74c3c'};`;
+        
         table.innerHTML += `
-          <tr class="${isCurrentUser ? 'highlight-row' : ''}">
-            <td>${i + 1}</td>
+          <tr class="${isCurrentUser ? 'highlight-row' : ''}">            <td>${i + 1}</td>
             <td>${username}</td>
-            <td>${r.average.toFixed(5)}</td>
-            <td>${r.total_credits}</td>
+            <td style="${creditsStyle}">${r.total_credits}/${r.total_possible_credits}</td>
+            <td>${averageDisplay}</td>
           </tr>
         `;
       });
@@ -83,9 +86,14 @@ window.loadRankings = async () => {
         rankInfo.style.fontWeight = 'bold';
         rankInfo.style.color = 'var(--primary-color)';
         table.parentNode.insertBefore(rankInfo, table);
-      }
-      if (userRank) {
-        rankInfo.textContent = `ترتيبك الحالي: ${userRank} من ${rankings.length}`;
+      }      if (userRank) {
+        const userStats = rankings.find(r => r.email === user.email);
+        rankInfo.textContent = `ترتيبك الحالي: ${userRank} من ${rankings.length} | المعاملات المنجزة: ${userStats.total_credits}/${userStats.total_possible_credits}`;
+        
+        // Add message if credits are less than maximum
+        if (userStats.total_credits < userStats.max_student_credits) {
+          rankInfo.textContent += ' | أدخل علامات بمعاملات كافية لرؤية معدلات الآخرين';
+        }
       } else {
         rankInfo.textContent = '';
       }
